@@ -1,3 +1,18 @@
+---
+title: ReliefRoute OpenEnv
+emoji: "🚚"
+colorFrom: blue
+colorTo: green
+sdk: docker
+app_port: 8000
+tags:
+  - openenv
+  - reinforcement-learning
+  - humanitarian-logistics
+  - disaster-response
+  - conflict-zones
+---
+
 # ReliefRoute OpenEnv
 
 ReliefRoute is an OpenEnv benchmark for humanitarian aid dispatch across disaster-hit and conflict-affected civilian zones. An agent must route limited vehicles carrying water, food, and medicine while handling deadlines, blocked corridors, access windows, checkpoint delays, and route risk.
