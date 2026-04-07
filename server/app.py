@@ -12,7 +12,7 @@ from uuid import uuid4
 
 import uvicorn
 from fastapi import Body
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from openenv.core.env_server import create_app
 from pydantic import BaseModel, Field
 
@@ -127,6 +127,11 @@ app = create_app(
     env_name="relief-route",
     max_concurrent_envs=int(os.getenv("MAX_CONCURRENT_ENVS", "64")),
 )
+
+
+@app.get("/", include_in_schema=False)
+def root() -> RedirectResponse:
+    return RedirectResponse(url="/dashboard", status_code=307)
 
 
 DASHBOARD_HTML = """
