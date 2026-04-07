@@ -1,0 +1,5 @@
+spec_version: 1
+name: relief-route
+type: space
+runtime: fastapi
+app: server.app:app

@@ -1,0 +1,58 @@
+{
+  "entries": [
+    {
+      "task_id": "easy",
+      "policy": "heuristic",
+      "final_score": 0.8923,
+      "weighted_fulfillment": 0.8893,
+      "on_time_coverage": 0.7464,
+      "safety_score": 1.0,
+      "completion_reason": "time_limit"
+    },
+    {
+      "task_id": "easy",
+      "policy": "heuristic",
+      "final_score": 0.8923,
+      "weighted_fulfillment": 0.8893,
+      "on_time_coverage": 0.7464,
+      "safety_score": 1.0,
+      "completion_reason": "time_limit"
+    },
+    {
+      "task_id": "easy",
+      "policy": "greedy",
+      "final_score": 0.8888,
+      "weighted_fulfillment": 0.8893,
+      "on_time_coverage": 0.7321,
+      "safety_score": 1.0,
+      "completion_reason": "time_limit"
+    },
+    {
+      "task_id": "easy",
+      "policy": "greedy",
+      "final_score": 0.8888,
+      "weighted_fulfillment": 0.8893,
+      "on_time_coverage": 0.7321,
+      "safety_score": 1.0,
+      "completion_reason": "time_limit"
+    },
+    {
+      "task_id": "easy",
+      "policy": "random",
+      "final_score": 0.7735,
+      "weighted_fulfillment": 0.6607,
+      "on_time_coverage": 0.6607,
+      "safety_score": 1.0,
+      "completion_reason": "time_limit"
+    },
+    {
+      "task_id": "easy",
+      "policy": "random",
+      "final_score": 0.7735,
+      "weighted_fulfillment": 0.6607,
+      "on_time_coverage": 0.6607,
+      "safety_score": 1.0,
+      "completion_reason": "time_limit"
+    }
+  ]
+}
