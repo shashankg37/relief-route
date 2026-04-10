@@ -124,10 +124,13 @@ class ReliefRouteEnvironment(Environment[ReliefRouteAction, ReliefRouteObservati
         reward_breakdown.penalty -= invalid_count * 0.35
         reward_breakdown.penalty -= idle_vehicle_count * 0.08
 
+        previous_score = self._state.last_score
         self._update_completion_status()
         weighted_fulfillment, on_time_coverage, efficiency_score, safety_score = self._current_metrics()
         final_score = score_episode(weighted_fulfillment, on_time_coverage, efficiency_score, safety_score)
         self._state.last_score = final_score
+        progress_delta = final_score - previous_score
+        reward_breakdown.progress_reward += max(-0.1, min(0.24, progress_delta * 1.6))
 
         if self._state.done:
             reward_breakdown.terminal_reward = final_score * 2.0
@@ -441,6 +444,7 @@ class ReliefRouteEnvironment(Environment[ReliefRouteAction, ReliefRouteObservati
             + reward_breakdown.timeliness_reward
             + reward_breakdown.efficiency_reward
             + reward_breakdown.safety_reward
+            + reward_breakdown.progress_reward
             + reward_breakdown.terminal_reward
             + reward_breakdown.penalty
         )

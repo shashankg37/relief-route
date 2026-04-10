@@ -16,7 +16,7 @@ from relief_route_env.models import ReliefRouteAction, ReliefRouteObservation
 API_BASE_URL = os.getenv("API_BASE_URL", "https://router.huggingface.co/v1")
 MODEL_NAME = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-72B-Instruct")
 API_KEY = os.getenv("HF_TOKEN") or os.getenv("API_KEY")
-LOCAL_IMAGE_NAME = os.getenv("LOCAL_IMAGE_NAME")
+LOCAL_IMAGE_NAME = os.getenv("LOCAL_IMAGE_NAME", "relief-route-openenv")
 TASK_NAME = os.getenv("RELIEF_ROUTE_TASK", "easy")
 BENCHMARK = os.getenv("RELIEF_ROUTE_BENCHMARK", "relief-route")
 MAX_STEPS = int(os.getenv("RELIEF_ROUTE_MAX_STEPS", "12"))
@@ -122,7 +122,14 @@ def build_user_prompt(step: int, observation_dict: dict[str, Any], history: list
     ).strip()
 
 
-def get_model_action(client: OpenAI, step: int, observation_dict: dict[str, Any], history: list[str]) -> ReliefRouteAction:
+def get_model_action(
+    client: OpenAI | None,
+    step: int,
+    observation_dict: dict[str, Any],
+    history: list[str],
+) -> ReliefRouteAction:
+    if client is None:
+        return fallback_action(observation_dict)
     user_prompt = build_user_prompt(step, observation_dict, history)
     try:
         response = client.chat.completions.create(
@@ -142,26 +149,22 @@ def get_model_action(client: OpenAI, step: int, observation_dict: dict[str, Any]
 
 
 async def main() -> None:
-    if not LOCAL_IMAGE_NAME:
-        raise RuntimeError("LOCAL_IMAGE_NAME must be set")
-    if not API_KEY:
-        raise RuntimeError("HF_TOKEN or API_KEY must be set")
-
-    client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
-    env = await GenericEnvClient.from_docker_image(
-        LOCAL_IMAGE_NAME,
-        env_vars={"RELIEF_ROUTE_TASK": TASK_NAME},
-    )
-
+    client: OpenAI | None = OpenAI(base_url=API_BASE_URL, api_key=API_KEY) if API_KEY else None
+    env: GenericEnvClient | None = None
     rewards: list[float] = []
     history: list[str] = []
     steps_taken = 0
     success = False
     final_score = 0.0
+    startup_error: str | None = None
 
     log_start(task=TASK_NAME, env=BENCHMARK, model=MODEL_NAME)
 
     try:
+        env = await GenericEnvClient.from_docker_image(
+            LOCAL_IMAGE_NAME,
+            env_vars={"RELIEF_ROUTE_TASK": TASK_NAME},
+        )
         reset_kwargs: dict[str, Any] = {}
         if SCENARIO_SEED is not None:
             try:
@@ -199,11 +202,23 @@ async def main() -> None:
                 break
 
         success = final_score >= SUCCESS_SCORE_THRESHOLD
+    except Exception as exc:
+        startup_error = str(exc)
+        success = False
     finally:
         try:
-            await env.close()
+            if env is not None:
+                await env.close()
         except Exception:
             pass
+        if startup_error:
+            log_step(
+                step=max(steps_taken, 1),
+                action="startup",
+                reward=0.0,
+                done=True,
+                error=startup_error,
+            )
         log_end(success=success, steps=steps_taken, rewards=rewards)
 
 
