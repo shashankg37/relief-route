@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from openenv import SyncEnvClient
+from openenv.core import SyncEnvClient
 
 from .models import ReliefRouteAction, ReliefRouteObservation, ReliefRouteState
 

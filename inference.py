@@ -15,7 +15,7 @@ from relief_route_env.models import ReliefRouteAction, ReliefRouteObservation
 
 API_BASE_URL = os.getenv("API_BASE_URL", "https://router.huggingface.co/v1")
 MODEL_NAME = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-72B-Instruct")
-API_KEY = os.getenv("API_KEY")
+API_KEY = os.getenv("API_KEY", "")
 LOCAL_IMAGE_NAME = os.getenv("LOCAL_IMAGE_NAME", "relief-route-openenv")
 TASK_NAME = os.getenv("RELIEF_ROUTE_TASK", "easy")
 BENCHMARK = os.getenv("RELIEF_ROUTE_BENCHMARK", "relief-route")
@@ -164,13 +164,11 @@ def build_user_prompt(step: int, observation_dict: dict[str, Any], history: list
 
 
 def get_model_action(
-    client: OpenAI | None,
+    client: OpenAI,
     step: int,
     observation_dict: dict[str, Any],
     history: list[str],
 ) -> ReliefRouteAction:
-    if client is None:
-        return fallback_action(observation_dict)
     user_prompt = build_user_prompt(step, observation_dict, history)
     try:
         response = client.chat.completions.create(
@@ -190,7 +188,7 @@ def get_model_action(
 
 
 async def main() -> None:
-    client: OpenAI | None = OpenAI(base_url=API_BASE_URL, api_key=API_KEY) if API_KEY else None
+    client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
     env: GenericEnvClient | None = None
     rewards: list[float] = []
     history: list[str] = []
