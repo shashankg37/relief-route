@@ -13,9 +13,9 @@ from openenv.core import GenericEnvClient
 from relief_route_env.baseline import heuristic_dispatch_action
 from relief_route_env.models import ReliefRouteAction, ReliefRouteObservation
 
-API_BASE_URL = os.getenv("API_BASE_URL", "https://router.huggingface.co/v1")
+API_BASE_URL = os.environ["API_BASE_URL"]
 MODEL_NAME = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-72B-Instruct")
-API_KEY = os.getenv("API_KEY", "")
+API_KEY = os.environ["API_KEY"]
 LOCAL_IMAGE_NAME = os.getenv("LOCAL_IMAGE_NAME", "relief-route-openenv")
 TASK_NAME = os.getenv("RELIEF_ROUTE_TASK", "easy")
 BENCHMARK = os.getenv("RELIEF_ROUTE_BENCHMARK", "relief-route")
@@ -183,7 +183,8 @@ def get_model_action(
         content = (response.choices[0].message.content or "").strip()
         parsed = extract_json(content)
         return ReliefRouteAction.model_validate(parsed)
-    except Exception:
+    except Exception as exc:
+        print(f"[LLM_ERROR] step={step} error={str(exc)[:200]}", flush=True)
         return fallback_action(observation_dict)
 
 
@@ -197,6 +198,8 @@ async def main() -> None:
     final_score = 0.0
     startup_error: str | None = None
 
+    print(f"[CONFIG] api_base_url={API_BASE_URL}", flush=True)
+    print(f"[CONFIG] api_key={'SET(' + API_KEY[:8] + '...)' if API_KEY else 'EMPTY'}", flush=True)
     log_start(task=TASK_NAME, env=BENCHMARK, model=MODEL_NAME)
 
     try:
