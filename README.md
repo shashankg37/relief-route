@@ -17,16 +17,6 @@ tags:
 
 ReliefRoute is an OpenEnv benchmark for humanitarian aid dispatch across disaster-hit and conflict-affected civilian zones. An agent must route limited vehicles carrying water, food, and medicine while handling deadlines, blocked corridors, access windows, checkpoint delays, and route risk.
 
-## Overview
-
-This repository is organized in the same order as the standard validation and deployment flow:
-
-1. OpenEnv validation
-2. Docker build and run
-3. Baseline inference script
-4. Three graded tasks with deterministic `0.0-1.0` scoring
-5. Optional visual dashboard
-
 ## Project Summary
 
 - `openenv.yaml` at the repo root
@@ -37,19 +27,52 @@ This repository is organized in the same order as the standard validation and de
 - deterministic graders with final score in `0.0-1.0`
 - Hugging Face Space deploy target
 
-## Quick Validation
+## Required Setup
 
 From the repository root:
 
 ```powershell
 .\venv\Scripts\Activate.ps1
 pip install -e ".[dev]"
+```
+
+## Required Validation
+
+From the repository root:
+
+```powershell
 python -m pytest
 python -m openenv.cli validate
 docker build --no-cache -f server\Dockerfile -t relief-route-openenv .
 ```
 
-If these pass, the project has cleared the main technical gates.
+## Required Inference Run
+
+The root inference script is [`inference.py`](inference.py).
+
+Required environment variables:
+
+```powershell
+$env:LOCAL_IMAGE_NAME="relief-route-openenv"
+$env:HF_TOKEN="<your_token>"
+$env:API_BASE_URL="https://router.huggingface.co/v1"
+$env:MODEL_NAME="Qwen/Qwen2.5-72B-Instruct"
+$env:RELIEF_ROUTE_TASK="hard"
+```
+
+Run:
+
+```powershell
+python inference.py
+```
+
+Stdout format:
+
+```text
+[START] task=hard env=relief-route model=Qwen/Qwen2.5-72B-Instruct
+[STEP] step=1 action={...} reward=0.42 done=false error=null
+[END] success=true steps=6 rewards=0.42,0.38,0.51,0.20,0.11,0.09
+```
 
 ## Tasks
 
@@ -90,41 +113,6 @@ If these pass, the project has cleared the main technical gates.
 
 The grader is deterministic for the same task and seed, but different actions produce different outcomes.
 
-## Inference Script
-
-The root inference script is [`inference.py`](inference.py).
-
-It:
-
-- uses the OpenAI client
-- launches the environment from a local Docker image
-- reads credentials from environment variables
-- prints strict `[START]`, `[STEP]`, `[END]` lines
-
-### Required environment variables
-
-```powershell
-$env:LOCAL_IMAGE_NAME="relief-route-openenv"
-$env:HF_TOKEN="<your_token>"
-$env:API_BASE_URL="https://router.huggingface.co/v1"
-$env:MODEL_NAME="Qwen/Qwen2.5-72B-Instruct"
-$env:RELIEF_ROUTE_TASK="hard"
-```
-
-### Run inference
-
-```powershell
-python inference.py
-```
-
-Expected stdout shape:
-
-```text
-[START] task=hard env=relief-route model=Qwen/Qwen2.5-72B-Instruct
-[STEP] step=1 action={...} reward=0.42 done=false error=null
-[END] success=true steps=6 rewards=0.42,0.38,0.51,0.20,0.11,0.09
-```
-
 ## Evaluation Utilities
 
 ### Policy evaluation
@@ -160,7 +148,7 @@ Or the installed command:
 relief-route-console --task expert
 ```
 
-## Local Dashboard
+## Dashboard
 
 Start the server:
 

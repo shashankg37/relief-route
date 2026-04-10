@@ -65,6 +65,7 @@ def _print_observation(observation: ReliefRouteObservation) -> None:
         f"timeliness={breakdown.timeliness_reward:.3f}, "
         f"efficiency={breakdown.efficiency_reward:.3f}, "
         f"safety={breakdown.safety_reward:.3f}, "
+        f"progress={breakdown.progress_reward:.3f}, "
         f"terminal={breakdown.terminal_reward:.3f}, "
         f"penalty={breakdown.penalty:.3f}"
     )
@@ -178,6 +179,7 @@ def main() -> None:
             + observation.reward_breakdown.timeliness_reward
             + observation.reward_breakdown.efficiency_reward
             + observation.reward_breakdown.safety_reward
+            + observation.reward_breakdown.progress_reward
             + observation.reward_breakdown.terminal_reward
             + observation.reward_breakdown.penalty
         )

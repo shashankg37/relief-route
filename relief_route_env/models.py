@@ -111,6 +111,7 @@ class RewardBreakdown(BaseModel):
     timeliness_reward: float = 0.0
     efficiency_reward: float = 0.0
     safety_reward: float = 0.0
+    progress_reward: float = 0.0
     terminal_reward: float = 0.0
     penalty: float = 0.0
 
