@@ -58,6 +58,7 @@ $env:HF_TOKEN="<your_token>"
 $env:API_BASE_URL="https://router.huggingface.co/v1"
 $env:MODEL_NAME="Qwen/Qwen2.5-72B-Instruct"
 $env:RELIEF_ROUTE_TASK="hard"
+$env:RELIEF_ROUTE_SPACE_ID="shash37/relief-route"
 ```
 
 Run:
@@ -65,6 +66,8 @@ Run:
 ```powershell
 python inference.py
 ```
+
+The script attempts local Docker startup first and falls back to the published Hugging Face Space when Docker is unavailable.
 
 Stdout format:
 

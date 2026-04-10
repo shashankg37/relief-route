@@ -20,6 +20,7 @@ LOCAL_IMAGE_NAME = os.getenv("LOCAL_IMAGE_NAME", "relief-route-openenv")
 TASK_NAME = os.getenv("RELIEF_ROUTE_TASK", "easy")
 BENCHMARK = os.getenv("RELIEF_ROUTE_BENCHMARK", "relief-route")
 SCENARIO_SEED = os.getenv("RELIEF_ROUTE_SEED")
+SPACE_ID = os.getenv("RELIEF_ROUTE_SPACE_ID", "shash37/relief-route")
 
 
 def _env_int(name: str, default: int) -> int:
@@ -46,6 +47,24 @@ MAX_STEPS = _env_int("RELIEF_ROUTE_MAX_STEPS", 12)
 TEMPERATURE = _env_float("RELIEF_ROUTE_TEMPERATURE", 0.2)
 MAX_TOKENS = _env_int("RELIEF_ROUTE_MAX_TOKENS", 500)
 SUCCESS_SCORE_THRESHOLD = _env_float("RELIEF_ROUTE_SUCCESS_THRESHOLD", 0.6)
+
+
+async def create_env_client() -> GenericEnvClient:
+    env_vars = {"RELIEF_ROUTE_TASK": TASK_NAME}
+    try:
+        return await GenericEnvClient.from_docker_image(
+            LOCAL_IMAGE_NAME,
+            env_vars=env_vars,
+        )
+    except Exception as docker_error:
+        docker_message = str(docker_error).lower()
+        if "docker" not in docker_message:
+            raise
+    return await GenericEnvClient.from_env(
+        SPACE_ID,
+        use_docker=False,
+        env_vars=env_vars,
+    )
 
 SYSTEM_PROMPT = textwrap.dedent(
     """
@@ -183,10 +202,7 @@ async def main() -> None:
     log_start(task=TASK_NAME, env=BENCHMARK, model=MODEL_NAME)
 
     try:
-        env = await GenericEnvClient.from_docker_image(
-            LOCAL_IMAGE_NAME,
-            env_vars={"RELIEF_ROUTE_TASK": TASK_NAME},
-        )
+        env = await create_env_client()
         reset_kwargs: dict[str, Any] = {}
         if SCENARIO_SEED is not None:
             try:
