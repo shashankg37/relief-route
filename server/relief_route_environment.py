@@ -59,6 +59,9 @@ class ReliefRouteEnvironment(Environment[ReliefRouteAction, ReliefRouteObservati
         episode_id: str | None = None,
         **kwargs,
     ) -> ReliefRouteObservation:
+        task_id = kwargs.get("task_id")
+        if isinstance(task_id, str) and task_id != self.task_config.task_id:
+            self.task_config = get_task(task_id)
         self._state = ReliefRouteState(
             episode_id=episode_id or str(uuid4()),
             step_count=0,
