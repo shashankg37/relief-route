@@ -11,6 +11,7 @@ from openai import OpenAI
 from openenv.core import GenericEnvClient
 
 from relief_route_env.baseline import heuristic_dispatch_action
+from relief_route_env.grader import STRICT_SCORE_EPSILON
 from relief_route_env.models import ReliefRouteAction, ReliefRouteObservation
 
 MODEL_NAME = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-72B-Instruct")
@@ -145,9 +146,23 @@ def log_step(step: int, action: str, reward: float, done: bool, error: str | Non
     )
 
 
-def log_end(success: bool, steps: int, rewards: list[float]) -> None:
+def log_end(success: bool, steps: int, rewards: list[float], final_score: float) -> None:
     reward_text = ",".join(f"{reward:.2f}" for reward in rewards)
-    print(f"[END] success={str(success).lower()} steps={steps} rewards={reward_text}", flush=True)
+    print(
+        f"[END] success={str(success).lower()} steps={steps} rewards={reward_text} "
+        f"final_score={final_score:.4f}",
+        flush=True,
+    )
+
+
+def _final_score_from_info(info: dict[str, Any], previous: float) -> float:
+    raw = info.get("final_score")
+    if raw is None:
+        return previous
+    try:
+        return float(raw)
+    except (TypeError, ValueError):
+        return previous
 
 
 def compact_json(data: dict[str, Any]) -> str:
@@ -236,7 +251,7 @@ async def main() -> None:
     history: list[str] = []
     steps_taken = 0
     success = False
-    final_score = 0.0
+    final_score = float(STRICT_SCORE_EPSILON)
     startup_error: str | None = None
 
     log_start(task=TASK_NAME, env=BENCHMARK, model=MODEL_NAME)
@@ -254,8 +269,8 @@ async def main() -> None:
 
         for step in range(1, MAX_STEPS + 1):
             observation_dict = result.observation or {}
-            info = observation_dict.get("info", {})
-            final_score = float(info.get("final_score", final_score) or 0.0)
+            info = observation_dict.get("info", {}) or {}
+            final_score = _final_score_from_info(info, final_score)
             if result.done:
                 break
 
@@ -268,8 +283,8 @@ async def main() -> None:
             steps_taken = step
 
             observation_dict = result.observation or {}
-            info = observation_dict.get("info", {})
-            final_score = float(info.get("final_score", final_score) or 0.0)
+            info = observation_dict.get("info", {}) or {}
+            final_score = _final_score_from_info(info, final_score)
             invalid_reasons = info.get("invalid_action_reasons") or []
             error = invalid_reasons[0] if invalid_reasons else None
             action_str = compact_json(action_payload)
@@ -298,7 +313,7 @@ async def main() -> None:
                 done=True,
                 error=startup_error,
             )
-        log_end(success=success, steps=steps_taken, rewards=rewards)
+        log_end(success=success, steps=steps_taken, rewards=rewards, final_score=final_score)
 
 
 if __name__ == "__main__":
@@ -308,6 +323,11 @@ if __name__ == "__main__":
         try:
             log_start(task=TASK_NAME, env=BENCHMARK, model=MODEL_NAME)
             log_step(step=1, action="startup", reward=0.0, done=True, error=str(exc))
-            log_end(success=False, steps=0, rewards=[])
+            log_end(
+                success=False,
+                steps=0,
+                rewards=[],
+                final_score=float(STRICT_SCORE_EPSILON),
+            )
         finally:
             raise SystemExit(0)
