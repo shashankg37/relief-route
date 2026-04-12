@@ -3,3 +3,34 @@ name: relief-route
 type: space
 runtime: fastapi
 app: server.app:app
+port: 8000
+version: "0.2.0"
+description: >
+  Humanitarian logistics OpenEnv benchmark. Agents dispatch limited vehicles carrying
+  water, food, and medicine across disaster and conflict-affected zones. Scoring uses
+  a deterministic grader; episode scores are strictly inside (0, 1).
+tasks:
+  - id: easy
+    name: Easy flood response
+    difficulty: easy
+    grader: true
+    max_steps: 6
+    description: >
+      Flood-response scenario with one vehicle and three zones; open routes and
+      lower-risk corridors. Prioritize medicine and deadline-sensitive demand.
+  - id: medium
+    name: Medium earthquake response
+    difficulty: medium
+    grader: true
+    max_steps: 8
+    description: >
+      Earthquake scenario with two vehicles and four zones; staggered route
+      reopening and competing supply priorities.
+  - id: hard
+    name: Hard disaster and conflict
+    difficulty: hard
+    grader: true
+    max_steps: 10
+    description: >
+      Combined disaster and conflict-affected response with three vehicles and
+      five zones; access windows, checkpoints, delays, and route risk.
