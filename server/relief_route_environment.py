@@ -34,6 +34,9 @@ SUPPLY_WEIGHTS = {
     SupplyType.MEDICINE: 1.5,
 }
 
+STRICT_SCORE_EPSILON = 0.0001
+STRICT_SCORE_CEILING = 0.9999
+
 
 class ReliefRouteEnvironment(Environment[ReliefRouteAction, ReliefRouteObservation, ReliefRouteState]):
     """Deterministic humanitarian logistics benchmark with dense reward shaping."""
@@ -415,6 +418,10 @@ class ReliefRouteEnvironment(Environment[ReliefRouteAction, ReliefRouteObservati
             safety_score,
         )
         self._state.last_score = current_score
+        weighted_fulfillment = self._strict_unit_interval(weighted_fulfillment)
+        on_time_coverage = self._strict_unit_interval(on_time_coverage)
+        efficiency_score = self._strict_unit_interval(efficiency_score)
+        safety_score = self._strict_unit_interval(safety_score)
         unmet_critical_zones = [
             zone.display_name
             for zone in self._state.zones
@@ -470,6 +477,9 @@ class ReliefRouteEnvironment(Environment[ReliefRouteAction, ReliefRouteObservati
         # Keep per-step reward within the hackathon's requested 0.0-1.0 range
         # while preserving ordering between worse and better actions.
         return max(0.0, min(1.0, raw_reward / 4.0))
+
+    def _strict_unit_interval(self, value: float) -> float:
+        return max(STRICT_SCORE_EPSILON, min(STRICT_SCORE_CEILING, value))
 
     def _has_remaining_demand(self) -> bool:
         return any(

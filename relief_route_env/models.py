@@ -122,11 +122,11 @@ class ReliefRouteInfo(BaseModel):
     completed_deliveries: int = 0
     invalid_action_count: int = 0
     idle_vehicle_count: int = 0
-    weighted_fulfillment: float = Field(default=0.0001, ge=0.0001, le=0.9999)
-    on_time_coverage: float = Field(default=0.0001, ge=0.0001, le=0.9999)
-    efficiency_score: float = Field(default=0.0001, ge=0.0001, le=0.9999)
-    safety_score: float = Field(default=0.0001, ge=0.0001, le=0.9999)
-    final_score: float = Field(default=0.0001, ge=0.0001, le=0.9999)
+    weighted_fulfillment: float = 0.0001
+    on_time_coverage: float = 0.0001
+    efficiency_score: float = 0.0001
+    safety_score: float = 0.0001
+    final_score: float = 0.0001
     unmet_critical_zones: list[str] = Field(default_factory=list)
     delivered_this_step: list[str] = Field(default_factory=list)
     invalid_action_reasons: list[str] = Field(default_factory=list)
