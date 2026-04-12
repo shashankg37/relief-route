@@ -22,8 +22,7 @@ ReliefRoute is an OpenEnv benchmark for humanitarian aid dispatch across disaste
 - `openenv.yaml` at the repo root
 - root-level `inference.py`
 - Dockerfile at [`server/Dockerfile`](server/Dockerfile)
-- three required tasks: `easy`, `medium`, `hard`
-- additional stress task: `expert`
+- three tasks: `easy`, `medium`, `hard`
 - deterministic graders with final score in `0.0-1.0`
 - Hugging Face Space deploy target
 
@@ -100,13 +99,6 @@ Stdout format:
 - 5 zones
 - access windows, checkpoint delays, and risky corridors
 
-### `expert`
-
-- larger multi-front humanitarian response
-- 4 vehicles
-- 6 zones
-- overlapping deadlines and more severe sequencing pressure
-
 ## Reward And Grader
 
 - step reward is normalized to `0.0-1.0`
@@ -123,9 +115,9 @@ The grader is deterministic for the same task and seed, but different actions pr
 Run the reference policies with [`scripts/evaluate_baselines.py`](scripts/evaluate_baselines.py):
 
 ```powershell
-python scripts/evaluate_baselines.py --tasks easy medium hard expert --episodes 3 --policy heuristic
-python scripts/evaluate_baselines.py --tasks easy medium hard expert --episodes 3 --policy greedy
-python scripts/evaluate_baselines.py --tasks easy medium hard expert --episodes 3 --policy random
+python scripts/evaluate_baselines.py --tasks easy medium hard --episodes 3 --policy heuristic
+python scripts/evaluate_baselines.py --tasks easy medium hard --episodes 3 --policy greedy
+python scripts/evaluate_baselines.py --tasks easy medium hard --episodes 3 --policy random
 ```
 
 ### Trace replay
@@ -142,13 +134,13 @@ python scripts/replay_trace.py traces/heuristic_hard_episode_1.json
 Use [`scripts/interactive_console.py`](scripts/interactive_console.py):
 
 ```powershell
-python scripts/interactive_console.py --task expert
+python scripts/interactive_console.py --task hard
 ```
 
 Or the installed command:
 
 ```powershell
-relief-route-console --task expert
+relief-route-console --task hard
 ```
 
 ## Dashboard

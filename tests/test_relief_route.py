@@ -13,9 +13,8 @@ def test_reset_returns_structured_observation() -> None:
 
 
 def test_task_catalog_has_three_levels() -> None:
-    assert set(TASKS.keys()) == {"easy", "medium", "hard", "expert"}
+    assert set(TASKS.keys()) == {"easy", "medium", "hard"}
     assert TASKS["hard"].scenario_theme == "disaster_and_conflict"
-    assert TASKS["expert"].scenario_theme == "disaster_and_conflict"
 
 
 def test_baseline_is_deterministic_on_medium() -> None:
@@ -56,7 +55,7 @@ def test_invalid_dispatch_is_penalized() -> None:
 
 
 def test_final_score_is_normalized() -> None:
-    env = ReliefRouteEnvironment(task_id="expert")
+    env = ReliefRouteEnvironment(task_id="hard")
     observation = env.reset()
     while not observation.done:
         observation = env.step(heuristic_dispatch_action(observation))
@@ -133,10 +132,3 @@ def test_demand_met_completion_path() -> None:
     observation = env.step(ReliefRouteAction(commands=[]))
     assert observation.done is True
     assert observation.metadata["completion_reason"] == "demand_met"
-
-
-def test_expert_task_has_more_operational_pressure() -> None:
-    expert = TASKS["expert"]
-    assert expert.max_steps > TASKS["hard"].max_steps
-    assert len(expert.vehicles) > len(TASKS["hard"].vehicles)
-    assert any(zone.route_risk_score >= 0.5 for zone in expert.zones)

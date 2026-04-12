@@ -233,7 +233,7 @@ DASHBOARD_HTML = """
         <div class="compact-note">Task is set by <code>RELIEF_ROUTE_TASK</code> at server startup.</div>
         <div class="muted" id="statusLine" style="margin-top:8px;">Reset the scenario to begin.</div>
       </div>
-      <label>Task<select id="taskSelect"><option value="easy">easy</option><option value="medium">medium</option><option value="hard">hard</option><option value="expert">expert</option></select></label>
+      <label>Task<select id="taskSelect"><option value="easy">easy</option><option value="medium">medium</option><option value="hard">hard</option></select></label>
       <label>Replay policy<select id="replayPolicy"><option value="heuristic">heuristic</option><option value="greedy">greedy</option><option value="random">random</option></select></label>
       <label>Assist policy<select id="assistPolicy"><option value="heuristic">heuristic</option><option value="greedy">greedy</option><option value="random">random</option></select></label>
       <button class="secondary" id="suggestBtn">Suggest Turn</button>
@@ -310,7 +310,7 @@ DASHBOARD_HTML = """
     function zoneRemaining(zone) { return `water ${Math.max(0, zone.demand.water - zone.delivered.water)} | food ${Math.max(0, zone.demand.food - zone.delivered.food)} | medicine ${Math.max(0, zone.demand.medicine - zone.delivered.medicine)}`; }
     function zoneFill(priority) { if (priority === 3) return "#ff7d7d"; if (priority === 2) return "#ffd970"; return "#7df0b6"; }
     function routeStroke(zone, currentStep) { if (zone.route_reopens_at_step !== null && currentStep < zone.route_reopens_at_step) return "#8ea2c8"; if (zone.route_risk_score >= 0.5) return "#ff6262"; if (zone.route_risk_score >= 0.25) return "#ffd24f"; return "#63f0aa"; }
-    function taskHint(observation) { if (observation.task_id === "easy") return "Field Clinic first for medicine, then shift to water and food at Shelter A."; if (observation.task_id === "medium") return "Regional Clinic needs medicine fast; Bridge Camp only opens later, so cover School Shelter meanwhile."; if (observation.task_id === "hard") return "Serve Trauma Center and Border Shelter early, but watch access windows and the Old Town route reopening."; return "Expert mode rewards convoy sequencing: cover Trauma Center, then stagger supplies into Border Shelter, North Camp, and late-opening corridors."; }
+    function taskHint(observation) { if (observation.task_id === "easy") return "Field Clinic first for medicine, then shift to water and food at Shelter A."; if (observation.task_id === "medium") return "Regional Clinic needs medicine fast; Bridge Camp only opens later, so cover School Shelter meanwhile."; return "Serve Trauma Center and Border Shelter early, but watch access windows and the Old Town route reopening."; }
 
     function renderMap(observation) {
       const svg = document.getElementById("missionMap");
