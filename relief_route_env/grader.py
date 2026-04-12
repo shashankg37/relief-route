@@ -5,6 +5,13 @@ from __future__ import annotations
 from .models import ReliefRouteInfo
 
 
+STRICT_SCORE_EPSILON = 0.0001
+
+
+def _strict_unit_interval(value: float) -> float:
+    return round(max(STRICT_SCORE_EPSILON, min(1.0 - STRICT_SCORE_EPSILON, value)), 4)
+
+
 def score_episode(
     weighted_fulfillment: float,
     on_time_coverage: float,
@@ -17,8 +24,8 @@ def score_episode(
         + (0.2 * efficiency_score)
         + (0.15 * safety_score)
     )
-    return round(max(0.0, min(1.0, score)), 4)
+    return _strict_unit_interval(score)
 
 
 def grade_observation(info: ReliefRouteInfo) -> float:
-    return round(max(0.0, min(1.0, info.final_score)), 4)
+    return _strict_unit_interval(info.final_score)
