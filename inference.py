@@ -13,9 +13,7 @@ from openenv.core import GenericEnvClient
 from relief_route_env.baseline import heuristic_dispatch_action
 from relief_route_env.models import ReliefRouteAction, ReliefRouteObservation
 
-API_BASE_URL = os.environ["API_BASE_URL"]
 MODEL_NAME = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-72B-Instruct")
-API_KEY = os.environ["API_KEY"]
 LOCAL_IMAGE_NAME = os.getenv("LOCAL_IMAGE_NAME", "relief-route-openenv")
 TASK_NAME = os.getenv("RELIEF_ROUTE_TASK", "easy")
 BENCHMARK = os.getenv("RELIEF_ROUTE_BENCHMARK", "relief-route")
@@ -47,6 +45,50 @@ MAX_STEPS = _env_int("RELIEF_ROUTE_MAX_STEPS", 12)
 TEMPERATURE = _env_float("RELIEF_ROUTE_TEMPERATURE", 0.2)
 MAX_TOKENS = _env_int("RELIEF_ROUTE_MAX_TOKENS", 500)
 SUCCESS_SCORE_THRESHOLD = _env_float("RELIEF_ROUTE_SUCCESS_THRESHOLD", 0.6)
+
+
+def _require_nonempty_env(name: str) -> str:
+    raw = os.environ.get(name)
+    if raw is None:
+        raise KeyError(name)
+    value = raw.strip()
+    if not value:
+        raise ValueError(
+            f"The {name} environment variable is set but empty after stripping whitespace."
+        )
+    return value
+
+
+def resolve_openai_base_url(raw: str) -> str:
+    """Normalize proxy base URLs for the OpenAI Python SDK (LiteLLM, Hugging Face, or similar).
+
+    The SDK merges paths such as ``/chat/completions`` onto this root. The
+    OpenAI-compatible API root must end with ``/v1`` (for example, LiteLLM);
+    otherwise traffic hits the wrong endpoint and validators see no usage on
+    the provided proxy key.
+    """
+    base = raw.strip().rstrip("/")
+    if not base:
+        raise ValueError("The API_BASE_URL value is empty after trimming whitespace.")
+    if base.endswith("/v1"):
+        return base
+    return f"{base}/v1"
+
+
+def build_llm_client() -> tuple[OpenAI, str, str]:
+    api_base_url = resolve_openai_base_url(_require_nonempty_env("API_BASE_URL"))
+    api_key = _require_nonempty_env("API_KEY")
+    return OpenAI(base_url=api_base_url, api_key=api_key), api_base_url, api_key
+
+
+def ping_llm_proxy(client: OpenAI) -> None:
+    """Send one minimal completion so a run always registers on the platform proxy key."""
+    client.chat.completions.create(
+        model=MODEL_NAME,
+        messages=[{"role": "user", "content": "Reply with exactly: OK"}],
+        temperature=0.0,
+        max_tokens=8,
+    )
 
 
 async def create_env_client() -> GenericEnvClient:
@@ -183,13 +225,12 @@ def get_model_action(
         content = (response.choices[0].message.content or "").strip()
         parsed = extract_json(content)
         return ReliefRouteAction.model_validate(parsed)
-    except Exception as exc:
-        print(f"[LLM_ERROR] step={step} error={str(exc)[:200]}", flush=True)
+    except Exception:
         return fallback_action(observation_dict)
 
 
 async def main() -> None:
-    client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
+    client, _, _ = build_llm_client()
     env: GenericEnvClient | None = None
     rewards: list[float] = []
     history: list[str] = []
@@ -198,11 +239,10 @@ async def main() -> None:
     final_score = 0.0
     startup_error: str | None = None
 
-    print(f"[CONFIG] api_base_url={API_BASE_URL}", flush=True)
-    print(f"[CONFIG] api_key={'SET(' + API_KEY[:8] + '...)' if API_KEY else 'EMPTY'}", flush=True)
     log_start(task=TASK_NAME, env=BENCHMARK, model=MODEL_NAME)
 
     try:
+        ping_llm_proxy(client)
         env = await create_env_client()
         reset_kwargs: dict[str, Any] = {}
         if SCENARIO_SEED is not None:
