@@ -212,7 +212,7 @@ class ReliefRouteEnvironment(Environment[ReliefRouteAction, ReliefRouteObservati
             priority=zone.priority,
             deadline_step=zone.deadline_step,
             travel_time=zone.travel_time,
-            route_risk_score=zone.route_risk_score,
+            route_risk=zone.route_risk,
             conflict_affected=zone.conflict_affected,
             access_window_start=zone.access_window_start,
             access_window_end=zone.access_window_end,
@@ -291,8 +291,8 @@ class ReliefRouteEnvironment(Environment[ReliefRouteAction, ReliefRouteObservati
         vehicle.cargo_supply_type = command.supply_type
         vehicle.cargo_quantity = command.quantity
         self._state.total_dispatched_units += command.quantity
-        self._state.cumulative_risk_exposure += zone.route_risk_score * command.quantity
-        if zone.route_risk_score >= 0.5:
+        self._state.cumulative_risk_exposure += zone.route_risk * command.quantity
+        if zone.route_risk >= 0.5:
             self._state.unsafe_dispatches += 1
         return True, None
 
@@ -331,7 +331,7 @@ class ReliefRouteEnvironment(Environment[ReliefRouteAction, ReliefRouteObservati
                         self._state.weighted_on_time_delivered += weighted_units
                         reward["timeliness"] += weighted_units * 0.08
                     reward["efficiency"] += min(1.0, deliverable / max(vehicle.capacity, 1)) * 0.12
-                    reward["safety"] += max(0.0, 0.16 - (zone.route_risk_score * 0.12))
+                    reward["safety"] += max(0.0, 0.16 - (zone.route_risk * 0.12))
                     delivered_messages.append(
                         f"{vehicle.vehicle_id} delivered {deliverable} {supply_type.value} to {zone.display_name}"
                     )

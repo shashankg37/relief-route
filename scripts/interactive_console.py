@@ -50,7 +50,7 @@ def _print_observation(observation: ReliefRouteObservation) -> None:
         print(
             f"  {zone.zone_id} ({zone.display_name}) priority={zone.priority} "
             f"deadline={zone.deadline_step} travel={zone.travel_time} checkpoint={zone.checkpoint_delay} "
-            f"risk={zone.route_risk_score:.2f} route={route_status} access={access_status}"
+                f"risk={zone.route_risk:.2f} route={route_status} access={access_status}"
         )
         print(
             f"    remaining: water={zone.remaining(SupplyType.WATER)} "
