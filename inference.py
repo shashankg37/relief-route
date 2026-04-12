@@ -278,7 +278,7 @@ async def main() -> None:
             action_payload = action.model_dump(exclude_none=True)
             result = await env.step(action_payload)
 
-            reward = float(result.reward or 0.0)
+            reward = float(result.reward or 0.01)
             rewards.append(reward)
             steps_taken = step
 
