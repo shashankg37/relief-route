@@ -44,7 +44,7 @@ class ZoneState(BaseModel):
     priority: int = Field(ge=1, le=3)
     deadline_step: int = Field(ge=1)
     travel_time: int = Field(ge=1)
-    route_risk_score: float = Field(default=0.0, ge=0.0, le=1.0)
+    route_risk_score: float = Field(default=0.0001, ge=0.0, le=1.0)
     conflict_affected: bool = False
     access_window_start: int = Field(default=0, ge=0)
     access_window_end: int | None = Field(default=None, ge=0)
@@ -157,7 +157,7 @@ class EpisodeTrace(BaseModel):
     policy: str = "manual"
     initial_observation: ReliefRouteObservation
     steps: list[TraceStep] = Field(default_factory=list)
-    final_score: float = 0.0
+    final_score: float = 0.0001
 
 
 class ReliefRouteState(State):
@@ -178,6 +178,6 @@ class ReliefRouteState(State):
     weighted_total_demand: float = 0.0
     weighted_delivered: float = 0.0
     weighted_on_time_delivered: float = 0.0
-    last_score: float = 0.0
+    last_score: float = 0.0001
     done: bool = False
     completion_reason: Literal["running", "demand_met", "time_limit", "inventory_exhausted"] = "running"
