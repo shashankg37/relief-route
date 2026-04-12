@@ -18,7 +18,7 @@ class ZoneTemplate(BaseModel):
     priority: int = Field(ge=1, le=3)
     deadline_step: int = Field(ge=1)
     travel_time: int = Field(ge=1)
-    route_risk_score: float = Field(default=0.0001, ge=0.0001, le=0.9999)
+    route_risk: float = Field(default=0.0001, ge=0.0001, le=0.9999)
     conflict_affected: bool = False
     access_window_start: int = Field(default=0, ge=0)
     access_window_end: int | None = Field(default=None, ge=0)
@@ -143,7 +143,7 @@ TASKS: dict[str, TaskConfig] = {
                 priority=3,
                 deadline_step=2,
                 travel_time=1,
-                route_risk_score=0.2,
+                    route_risk=0.2,
                 conflict_affected=True,
                 access_window_start=0,
                 access_window_end=4,
@@ -157,7 +157,7 @@ TASKS: dict[str, TaskConfig] = {
                 priority=3,
                 deadline_step=4,
                 travel_time=2,
-                route_risk_score=0.35,
+                    route_risk=0.35,
                 conflict_affected=True,
                 access_window_start=1,
                 access_window_end=7,
@@ -171,7 +171,7 @@ TASKS: dict[str, TaskConfig] = {
                 priority=2,
                 deadline_step=5,
                 travel_time=2,
-                route_risk_score=0.6,
+                    route_risk=0.6,
                 conflict_affected=True,
                 access_window_start=2,
                 access_window_end=6,
@@ -186,7 +186,7 @@ TASKS: dict[str, TaskConfig] = {
                 priority=2,
                 deadline_step=6,
                 travel_time=3,
-                route_risk_score=0.15,
+                    route_risk=0.15,
                 displaced_population=170,
                 demand=SupplyLedger(food=2, water=3),
             ),
@@ -196,7 +196,7 @@ TASKS: dict[str, TaskConfig] = {
                 priority=1,
                 deadline_step=8,
                 travel_time=3,
-                route_risk_score=0.4,
+                    route_risk=0.4,
                 conflict_affected=True,
                 access_window_start=4,
                 access_window_end=9,

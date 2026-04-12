@@ -34,7 +34,7 @@ def _zone_score(zone: ZoneState, supply_type: SupplyType, current_step: int) -> 
     deadline_pressure = max(1.0, float(zone.deadline_step - current_step))
     score = (remaining * SUPPLY_WEIGHTS[supply_type] * float(zone.priority)) / deadline_pressure
     score = score / float(zone.travel_time + zone.checkpoint_delay)
-    score -= zone.route_risk_score * 0.8
+    score -= zone.route_risk * 0.8
     if zone.conflict_affected and supply_type == SupplyType.MEDICINE:
         score += 0.9
     if zone.priority == 3:
