@@ -73,6 +73,13 @@ class ReliefRouteEnvironment(Environment[ReliefRouteAction, ReliefRouteObservati
             done=False,
             completion_reason="running",
         )
+        weighted_fulfillment, on_time_coverage, efficiency_score, safety_score = self._current_metrics()
+        self._state.last_score = score_episode(
+            weighted_fulfillment,
+            on_time_coverage,
+            efficiency_score,
+            safety_score,
+        )
         observation = self._build_observation(RewardBreakdown(), [], 0, 0, [])
         self._initial_observation = observation.model_copy(deep=True)
         self._trace_steps = []
@@ -398,6 +405,13 @@ class ReliefRouteEnvironment(Environment[ReliefRouteAction, ReliefRouteObservati
         normalized_reward: float | None = None,
     ) -> ReliefRouteObservation:
         weighted_fulfillment, on_time_coverage, efficiency_score, safety_score = self._current_metrics()
+        current_score = score_episode(
+            weighted_fulfillment,
+            on_time_coverage,
+            efficiency_score,
+            safety_score,
+        )
+        self._state.last_score = current_score
         unmet_critical_zones = [
             zone.display_name
             for zone in self._state.zones
@@ -413,7 +427,7 @@ class ReliefRouteEnvironment(Environment[ReliefRouteAction, ReliefRouteObservati
             on_time_coverage=round(on_time_coverage, 4),
             efficiency_score=round(efficiency_score, 4),
             safety_score=round(safety_score, 4),
-            final_score=round(self._state.last_score, 4),
+            final_score=round(current_score, 4),
             unmet_critical_zones=unmet_critical_zones,
             delivered_this_step=delivered_this_step,
             invalid_action_reasons=invalid_action_reasons,
