@@ -363,15 +363,15 @@ class ReliefRouteEnvironment(Environment[ReliefRouteAction, ReliefRouteObservati
 
     def _current_metrics(self) -> tuple[float, float, float, float]:
         if self._state.weighted_total_demand <= 0:
-            return 1.0, 1.0, 1.0, 1.0
+            return self._strict_unit_interval(1.0), self._strict_unit_interval(1.0), self._strict_unit_interval(1.0), self._strict_unit_interval(1.0)
 
-        weighted_fulfillment = min(1.0, self._state.weighted_delivered / self._state.weighted_total_demand)
-        on_time_coverage = min(1.0, self._state.weighted_on_time_delivered / self._state.weighted_total_demand)
+        weighted_fulfillment = self._strict_unit_interval(min(1.0, self._state.weighted_delivered / self._state.weighted_total_demand))
+        on_time_coverage = self._strict_unit_interval(min(1.0, self._state.weighted_on_time_delivered / self._state.weighted_total_demand))
 
         dispatch_efficiency = 1.0
         if self._state.total_dispatched_units > 0:
             dispatch_efficiency = self._state.useful_delivered_units / float(self._state.total_dispatched_units)
-        efficiency_score = max(
+        efficiency_score = self._strict_unit_interval(max(
             0.0,
             min(
                 1.0,
@@ -379,12 +379,12 @@ class ReliefRouteEnvironment(Environment[ReliefRouteAction, ReliefRouteObservati
                 - (self._state.invalid_action_count * 0.03)
                 - (self._state.idle_vehicle_count * 0.015),
             ),
-        )
+        ))
 
         total_dispatches = max(1, self._state.total_dispatched_units)
         average_risk = self._state.cumulative_risk_exposure / float(total_dispatches)
         unsafe_penalty = (self._state.unsafe_dispatches * 0.25) / total_dispatches
-        safety_score = max(0.0, min(1.0, 1.0 - (average_risk * 0.8) - unsafe_penalty))
+        safety_score = self._strict_unit_interval(max(0.0, min(1.0, 1.0 - (average_risk * 0.8) - unsafe_penalty)))
         return weighted_fulfillment, on_time_coverage, efficiency_score, safety_score
 
     def _update_completion_status(self) -> None:
