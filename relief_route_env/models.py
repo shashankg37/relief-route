@@ -127,6 +127,19 @@ class ReliefRouteInfo(BaseModel):
     efficiency_score: float = 0.0001
     safety_score: float = 0.0001
     final_score: float = 0.0001
+
+    @model_validator(mode="after")
+    def validate_scores_in_strict_interval(self) -> "ReliefRouteInfo":
+        """Ensure all scores are strictly between 0 and 1, never exactly at boundaries."""
+        epsilon = 0.0001
+        ceiling = 0.9999
+        self.weighted_fulfillment = max(epsilon, min(ceiling, self.weighted_fulfillment))
+        self.on_time_coverage = max(epsilon, min(ceiling, self.on_time_coverage))
+        self.efficiency_score = max(epsilon, min(ceiling, self.efficiency_score))
+        self.safety_score = max(epsilon, min(ceiling, self.safety_score))
+        self.final_score = max(epsilon, min(ceiling, self.final_score))
+        return self
+
     unmet_critical_zones: list[str] = Field(default_factory=list)
     delivered_this_step: list[str] = Field(default_factory=list)
     invalid_action_reasons: list[str] = Field(default_factory=list)
@@ -159,6 +172,14 @@ class EpisodeTrace(BaseModel):
     steps: list[TraceStep] = Field(default_factory=list)
     final_score: float = 0.0001
 
+    @model_validator(mode="after")
+    def validate_final_score_in_strict_interval(self) -> "EpisodeTrace":
+        """Ensure final_score is strictly between 0 and 1."""
+        epsilon = 0.0001
+        ceiling = 0.9999
+        self.final_score = max(epsilon, min(ceiling, self.final_score))
+        return self
+
 
 class ReliefRouteState(State):
     task_id: str
@@ -181,3 +202,11 @@ class ReliefRouteState(State):
     last_score: float = 0.0001
     done: bool = False
     completion_reason: Literal["running", "demand_met", "time_limit", "inventory_exhausted"] = "running"
+
+    @model_validator(mode="after")
+    def validate_last_score_in_strict_interval(self) -> "ReliefRouteState":
+        """Ensure last_score is strictly between 0 and 1."""
+        epsilon = 0.0001
+        ceiling = 0.9999
+        self.last_score = max(epsilon, min(ceiling, self.last_score))
+        return self
