@@ -18,7 +18,7 @@ class ZoneTemplate(BaseModel):
     priority: int = Field(ge=1, le=3)
     deadline_step: int = Field(ge=1)
     travel_time: int = Field(ge=1)
-    route_risk_score: float = Field(default=0.0, ge=0.0, le=1.0)
+    route_risk_score: float = Field(default=0.0001, ge=0.0001, le=0.9999)
     conflict_affected: bool = False
     access_window_start: int = Field(default=0, ge=0)
     access_window_end: int | None = Field(default=None, ge=0)
