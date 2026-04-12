@@ -6,10 +6,11 @@ from .models import ReliefRouteInfo
 
 
 STRICT_SCORE_EPSILON = 0.0001
+STRICT_SCORE_CEILING = 0.9999
 
 
 def _strict_unit_interval(value: float) -> float:
-    return round(max(STRICT_SCORE_EPSILON, min(1.0 - STRICT_SCORE_EPSILON, value)), 4)
+    return round(max(STRICT_SCORE_EPSILON, min(STRICT_SCORE_CEILING, value)), 4)
 
 
 def score_episode(
