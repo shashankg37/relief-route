@@ -151,7 +151,7 @@ def _parse_turn_input(observation: ReliefRouteObservation) -> ReliefRouteAction 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Play ReliefRoute interactively in the terminal.")
-    parser.add_argument("--task", choices=["easy", "medium", "hard", "expert"], default="easy")
+    parser.add_argument("--task", choices=["easy", "medium", "hard"], default="easy")
     args = parser.parse_args()
 
     env = ReliefRouteEnvironment(task_id=args.task)
